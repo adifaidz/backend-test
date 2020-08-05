@@ -18,20 +18,22 @@ class CommentRepository extends BaseRepository
     public function search(Request $request) : array
     {   $comments =$this->all();
 
+        // If no params sent, return all
         if(!count($request->all()))
             return $comments;
 
+        // If there's no params matching the searchable array , return empty
         if(!$request->hasAny($this->searchable))
             return [];
 
+
         return collect($comments)->filter(function ($comment) use ($request) {
-            $found = false;
+            $found = true;
 
             foreach($request->only($this->searchable) as $filter => $searchValue) {
                 $commentValue = $comment[$filter];
-                if($this->stringSearch($commentValue, $searchValue) || $this->numericSearch($commentValue, $searchValue))
-                    $found = true;
-                else {
+
+                if(!$this->stringSearch($commentValue, $searchValue) && !$this->numericSearch($commentValue, $searchValue)){
                     $found = false;
                     break;
                 }
